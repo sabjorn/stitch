@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 project(stitch)
 
@@ -8,13 +8,30 @@ option(STITCH_STATIC_LIB "Build Stitch as a static library." OFF)
 
 add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Werror=return-type)
 
+# Platform-specific source files
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(platform_sources
+        stitch/linux/events.cpp
+        stitch/linux/signal.cpp
+        stitch/linux/timer.cpp
+        stitch/linux/file_event.cpp
+        stitch/linux/file.cpp
+    )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(platform_sources
+        stitch/darwin/events.cpp
+        stitch/darwin/signal.cpp
+        stitch/darwin/timer.cpp
+        stitch/darwin/file_event.cpp
+        stitch/darwin/file.cpp
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
 set(sources
     stitch/hazard_pointers.cpp
-    stitch/linux/events.cpp
-    stitch/linux/signal.cpp
-    stitch/linux/timer.cpp
-    stitch/linux/file_event.cpp
-    stitch/linux/file.cpp
+    ${platform_sources}
 )
 
 if(STITCH_STATIC_LIB)
